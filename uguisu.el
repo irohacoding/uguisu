@@ -1,4 +1,32 @@
-;;; uguisu.el --- chat -*- lexical-binding: t -*-
+;;; uguisu.el --- A chat program with AI -*- lexical-binding: t -*-
+
+;; Copyright (C) 2023 IrohaCoding
+
+;; Author: IrohaCoding <info@irohacoding.com>
+;; Version: 0.1.0
+;; Package-Requires: ((emacs "27.1"))
+;; Homepage: https://github.com/irohacoding/uguisu
+
+;; This file is not part of GNU Emacs, but is distributed under
+;; the same terms.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either verion 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with GNU Emacs. If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;; M-x uguisu and write message, and then by pressing the RET key twice,
+;; to submit your request.
 
 ;;; Code:
 
@@ -12,12 +40,12 @@
     map))
 
 (define-derived-mode uguisu-mode text-mode "Uguisu"
-  "Major mode for running the Uguisu program using ChatGPT."
+  "Major mode for running the Uguisu program using OpenAI API."
   (turn-on-auto-fill))
 
 ;;;###autoload
 (defun uguisu ()
-  "Open *uguisu* buffer."
+  "Open *uguisu* buffer and insert greeting message."
   (interactive)
   (split-window-below)
   (other-window 1)
