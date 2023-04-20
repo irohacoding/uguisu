@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 IrohaCoding
 
 ;; Author: IrohaCoding <info@irohacoding.com>
-;; Version: 0.1.0
+;; Version: 0.1.1
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/irohacoding/uguisu
 
@@ -65,19 +65,19 @@
   "Read input text and request it for chatgpt."
   (interactive)
   (let ((cur-pos (1- (point)))
-	(prompt))
+        (prompt))
     (save-excursion
       (re-search-backward "^$" nil t)
       (setq prompt (buffer-substring-no-properties (+ 2 (point)) cur-pos))
       (unless (string-equal prompt "\n")
-	(get-response prompt 'extract-content)))))
+        (get-response prompt 'extract-content)))))
 
 (defun get-response (prompt callback)
   "Generate a response from OpenAI API based on the given prompt."
   (let* ((url "https://api.openai.com/v1/chat/completions")
          (params `(("model" . "gpt-3.5-turbo")
                    ("messages" . [(("role" . "user") ("content" . ,prompt))])
-		   ("stream" . t)))
+                   ("stream" . t)))
          (headers `(("Content-Type" . "application/json")
                     ("Authorization" . ,(concat "Bearer " chatgpt-api-key)))))
     (request
@@ -86,18 +86,18 @@
       :data (json-encode params)
       :headers headers
       :success (cl-function
-		(lambda (&key data &allow-other-keys)
-		  (funcall callback data))))))
+                (lambda (&key data &allow-other-keys)
+                  (funcall callback data))))))
 
 (defun extract-content (response)
   "Extract content part from response."
   (let ((jsons (delete "" (split-string response "\n\n")))
-	(messages '("\n")))
+        (messages '("\n")))
     (dotimes (i (list-length jsons))
       (setq json (substring (pop jsons) 6))
       (unless (string-equal json "[DONE]")
-	(setq delta (cdr (assoc 'delta (elt (cdr (assoc 'choices (json-read-from-string json))) 0))))
-	(when (assoc 'content delta)
+        (setq delta (cdr (assoc 'delta (elt (cdr (assoc 'choices (json-read-from-string json))) 0))))
+        (when (assoc 'content delta)
           (push (cdr (assoc 'content delta)) messages))))
     (push "\n\n\n" messages)
     (print-message (reverse messages))))
@@ -108,10 +108,11 @@
   (insert-with-timer messages))
 
 (defun insert-with-timer (messages)
-  (let ((len (list-length messages)))
+  (let ((len (list-length messages))
+        (delay 0.1))
     (dotimes (i len)
-      (run-with-timer (* i 0.1) nil
-		      (lambda ()
+      (run-with-timer (* i delay) nil
+                      (lambda ()
                         (insert (pop messages)))))))
 
 (provide 'uguisu)
