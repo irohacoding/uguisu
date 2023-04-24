@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 IrohaCoding
 
 ;; Author: IrohaCoding <info@irohacoding.com>
-;; Version: 0.1.1
+;; Version: 0.2.0
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/irohacoding/uguisu
 
@@ -26,12 +26,12 @@
 ;;; Commentary:
 
 ;; M-x uguisu and write message, and then by pressing the RET key twice,
-;; to submit your request.
+;; to submit your message. After waiting for a while, you will receive
+;; a reply.
 
 ;;; Code:
 
 (require 'json)
-(require 'request)
 
 (defvar uguisu-mode-map
   (let ((map (make-sparse-keymap)))
@@ -40,7 +40,7 @@
     map))
 
 (define-derived-mode uguisu-mode text-mode "Uguisu"
-  "Major mode for running the Uguisu program using OpenAI API."
+  "Major mode for running the Uguisu program."
   (turn-on-auto-fill))
 
 ;;;###autoload
@@ -62,7 +62,7 @@
     (newline arg)))
 
 (defun uguisu-read-print ()
-  "Read input text and request it for chatgpt."
+  "Read input text and request it for OpenAI API."
   (interactive)
   (let ((cur-pos (1- (point)))
         (prompt))
@@ -70,50 +70,39 @@
       (re-search-backward "^$" nil t)
       (setq prompt (buffer-substring-no-properties (+ 2 (point)) cur-pos))
       (unless (string-equal prompt "\n")
-        (get-response prompt 'extract-content)))))
+        (send-request prompt)))))
 
-(defun get-response (prompt callback)
-  "Generate a response from OpenAI API based on the given prompt."
-  (let* ((url "https://api.openai.com/v1/chat/completions")
-         (params `(("model" . "gpt-3.5-turbo")
-                   ("messages" . [(("role" . "user") ("content" . ,prompt))])
-                   ("stream" . t)))
-         (headers `(("Content-Type" . "application/json")
-                    ("Authorization" . ,(concat "Bearer " chatgpt-api-key)))))
-    (request
-      url
-      :type "POST"
-      :data (json-encode params)
-      :headers headers
-      :success (cl-function
-                (lambda (&key data &allow-other-keys)
-                  (funcall callback data))))))
+(defun send-request (prompt)
+  "Sends a request to the OpenAI API."
+  (let ((proc (start-process "openai-api-connection" nil
+                             "curl" "https://api.openai.com/v1/chat/completions"
+                             "-H" "Content-Type: application/json"
+                             "-H" "Accept: text/event-stream"
+                             "-H" (format "Authorization: Bearer %s" openai-api-key)
+                             "-d" (json-encode `(("model" . "gpt-3.5-turbo")
+                                                 ("messages" . [(("role" . "user") ("content" . ,prompt))])
+                                                 ("stream" . t))))))
+    (set-process-filter-multibyte proc t)
+    (set-process-coding-system proc 'utf-8 'utf-8)
+    (set-process-filter proc #'process-filter)
+    (set-process-sentinel proc #'process-sentinel)))
 
-(defun extract-content (response)
-  "Extract content part from response."
-  (let ((jsons (delete "" (split-string response "\n\n")))
-        (messages '("\n")))
-    (dotimes (i (list-length jsons))
-      (setq json (substring (pop jsons) 6))
-      (unless (string-equal json "[DONE]")
+(defun process-filter (process content)
+  "Print response in *uguisu* buffer."
+  (let ((data (delete "" (split-string content "\n\n"))))
+    (dotimes (i (list-length data))
+      (setq json (substring (pop data) 6))
+      (if (string-equal json "[DONE]")
+          (insert "\n\n\n")
         (setq delta (cdr (assoc 'delta (elt (cdr (assoc 'choices (json-read-from-string json))) 0))))
-        (when (assoc 'content delta)
-          (push (cdr (assoc 'content delta)) messages))))
-    (push "\n\n\n" messages)
-    (print-message (reverse messages))))
+        (cond ((assoc 'role delta)
+               (insert "\n"))
+              ((assoc 'content delta)
+               (insert (cdr (assoc 'content delta)))))))))
 
-(defun print-message (messages)
-  "Print the given message to the *uguisu* buffer."
-  (goto-char (point-max))
-  (insert-with-timer messages))
-
-(defun insert-with-timer (messages)
-  (let ((len (list-length messages))
-        (delay 0.1))
-    (dotimes (i len)
-      (run-with-timer (* i delay) nil
-                      (lambda ()
-                        (insert (pop messages)))))))
+(defun process-sentinel (process event)
+  "Message process event."
+  (princ (substring event 0 (1- (length event)))))
 
 (provide 'uguisu)
 
