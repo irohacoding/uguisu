@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 IrohaCoding
 
 ;; Author: IrohaCoding <info@irohacoding.com>
-;; Version: 0.2.0
+;; Version: 0.2.1
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/irohacoding/uguisu
 
@@ -70,7 +70,10 @@
       (re-search-backward "^$" nil t)
       (setq prompt (buffer-substring-no-properties (+ 2 (point)) cur-pos))
       (unless (string-equal prompt "\n")
-        (send-request prompt)))))
+        (if (not (executable-find "curl"))
+            (insert (concat "Message from uguisu: curl command is not installed.\n"
+                            "Please install it before using this program.\n\n"))
+          (send-request prompt))))))
 
 (defun send-request (prompt)
   "Sends a request to the OpenAI API."
