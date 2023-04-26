@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 IrohaCoding
 
 ;; Author: IrohaCoding <info@irohacoding.com>
-;; Version: 0.2.1
+;; Version: 0.2.2
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/irohacoding/uguisu
 
@@ -64,11 +64,11 @@
 (defun uguisu-read-print ()
   "Read input text and request it for OpenAI API."
   (interactive)
-  (let ((cur-pos (1- (point)))
-        (prompt))
+  (let ((cur-pos (point))
+        (prompt ""))
     (save-excursion
       (re-search-backward "^$" nil t)
-      (setq prompt (buffer-substring-no-properties (+ 2 (point)) cur-pos))
+      (setq prompt (buffer-substring-no-properties (+ 2 (point)) (1- cur-pos)))
       (unless (string-equal prompt "\n")
         (if (not (executable-find "curl"))
             (insert (concat "Message from uguisu: curl command is not installed.\n"
