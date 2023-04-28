@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 IrohaCoding
 
 ;; Author: IrohaCoding <info@irohacoding.com>
-;; Version: 0.2.2
+;; Version: 0.2.3
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/irohacoding/uguisu
 
@@ -39,6 +39,9 @@
     (define-key map "\r" 'uguisu-ret-or-read)
     map))
 
+(defvar uguisu-buffer "*uguisu*"
+  "Buffer name of this program.")
+
 (define-derived-mode uguisu-mode text-mode "Uguisu"
   "Major mode for running the Uguisu program."
   (turn-on-auto-fill))
@@ -47,19 +50,22 @@
 (defun uguisu ()
   "Open *uguisu* buffer and insert greeting message."
   (interactive)
-  (split-window-below)
-  (other-window 1)
-  (switch-to-buffer (get-buffer-create "*uguisu*"))
-  (unless (eq major-mode 'uguisu-mode)
-    (uguisu-mode)
-    (insert (concat "Hello! this is uguisu, powered by OpenAI API.\n"
-                    "Write message below  line and type RET twice.\n\n\n"))))
+  (if (get-buffer uguisu-buffer)
+      (switch-to-buffer-other-window uguisu-buffer)
+    (split-window-below)
+    (other-window 1)
+    (switch-to-buffer (get-buffer-create uguisu-buffer))
+    (unless (eq major-mode 'uguisu-mode)
+      (uguisu-mode)
+      (insert (concat "Hello! this is uguisu, powered by OpenAI API.\n"
+                      "Write message below  line and type RET twice.\n\n\n")))))
 
 (defun uguisu-ret-or-read (arg)
   (interactive "*p")
-  (if (= (preceding-char) ?\n)
-      (uguisu-read-print)
-    (newline arg)))
+  (when (eq major-mode 'uguisu-mode)
+    (if (= (preceding-char) ?\n)
+        (uguisu-read-print)
+      (newline arg))))
 
 (defun uguisu-read-print ()
   "Read input text and request it for OpenAI API."
@@ -67,13 +73,13 @@
   (let ((cur-pos (point))
         (prompt ""))
     (save-excursion
-      (re-search-backward "^$" nil t)
-      (setq prompt (buffer-substring-no-properties (+ 2 (point)) (1- cur-pos)))
-      (unless (string-equal prompt "\n")
-        (if (not (executable-find "curl"))
-            (insert (concat "Message from uguisu: curl command is not installed.\n"
-                            "Please install it before using this program.\n\n"))
-          (send-request prompt))))))
+      (if (not (re-search-backward "^$" nil t))
+          (message "uguisu:  mark not found.")
+        (setq prompt (buffer-substring-no-properties (+ 2 (point)) (1- cur-pos)))
+        (unless (string-equal prompt "\n")
+          (if (not (executable-find "curl"))
+              (insert "curl command is not found.\n\n")
+            (send-request prompt)))))))
 
 (defun send-request (prompt)
   "Sends a request to the OpenAI API."
