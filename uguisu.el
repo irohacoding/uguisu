@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 IrohaCoding
 
 ;; Author: IrohaCoding <info@irohacoding.com>
-;; Version: 0.2.3
+;; Version: 0.2.4
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/irohacoding/uguisu
 
@@ -98,16 +98,15 @@
 
 (defun process-filter (process content)
   "Print response in *uguisu* buffer."
-  (let ((data (delete "" (split-string content "\n\n"))))
-    (dotimes (i (list-length data))
-      (setq json (substring (pop data) 6))
-      (if (string-equal json "[DONE]")
-          (insert "\n\n\n")
-        (setq delta (cdr (assoc 'delta (elt (cdr (assoc 'choices (json-read-from-string json))) 0))))
-        (cond ((assoc 'role delta)
-               (insert "\n"))
-              ((assoc 'content delta)
-               (insert (cdr (assoc 'content delta)))))))))
+  (dolist (data (delete "" (split-string content "\n\n")))
+    (setq json (substring data 6))
+    (if (string-equal json "[DONE]")
+        (insert "\n\n\n")
+      (setq delta (cdr (assoc 'delta (elt (cdr (assoc 'choices (json-read-from-string json))) 0))))
+      (cond ((assoc 'role delta)
+             (insert "\n"))
+            ((assoc 'content delta)
+             (insert (cdr (assoc 'content delta))))))))
 
 (defun process-sentinel (process event)
   "Message process event."
