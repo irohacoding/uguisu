@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 IrohaCoding
 
 ;; Author: IrohaCoding <info@irohacoding.com>
-;; Version: 0.2.4
+;; Version: 0.2.5
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/irohacoding/uguisu
 
@@ -32,6 +32,16 @@
 ;;; Code:
 
 (require 'json)
+
+(defgroup uguisu nil
+  "Uguisu options."
+  :group 'convenience)
+
+(defcustom uguisu-ai-model "gpt-3.5-turbo"
+  "AI model for uguisu."
+  :type '(choice (const :tag "gpt-3.5-turbo" "gpt-3.5-turbo")
+                 (const :tag "gpt-4" "gpt-4"))
+  :group 'uguisu)
 
 (defvar uguisu-mode-map
   (let ((map (make-sparse-keymap)))
@@ -74,7 +84,7 @@
         (prompt ""))
     (save-excursion
       (if (not (re-search-backward "^$" nil t))
-          (message "uguisu:  mark not found.")
+          (message "Uguisu: Form feed () is not found.")
         (setq prompt (buffer-substring-no-properties (+ 2 (point)) (1- cur-pos)))
         (unless (string-equal prompt "\n")
           (if (not (executable-find "curl"))
@@ -88,7 +98,7 @@
                              "-H" "Content-Type: application/json"
                              "-H" "Accept: text/event-stream"
                              "-H" (format "Authorization: Bearer %s" openai-api-key)
-                             "-d" (json-encode `(("model" . "gpt-3.5-turbo")
+                             "-d" (json-encode `(("model" . ,uguisu-ai-model)
                                                  ("messages" . [(("role" . "user") ("content" . ,prompt))])
                                                  ("stream" . t))))))
     (set-process-filter-multibyte proc t)
@@ -98,15 +108,25 @@
 
 (defun process-filter (process content)
   "Print response in *uguisu* buffer."
-  (dolist (data (delete "" (split-string content "\n\n")))
-    (setq json (substring data 6))
-    (if (string-equal json "[DONE]")
-        (insert "\n\n\n")
-      (setq delta (cdr (assoc 'delta (elt (cdr (assoc 'choices (json-read-from-string json))) 0))))
-      (cond ((assoc 'role delta)
-             (insert "\n"))
-            ((assoc 'content delta)
-             (insert (cdr (assoc 'content delta))))))))
+  (if (not (string-match "^data: " content))
+      (insert-error-message content)
+    (dolist (data (delete "" (split-string content "\n\n")))
+      (let ((data-body ""))
+        (setq data-body (substring data 6))
+        (if (string-equal data-body "[DONE]")
+            (insert "\n\n\n")
+          (let* ((json (json-read-from-string data-body))
+                 (delta (cdr (assoc 'delta (elt (cdr (assoc 'choices json)) 0)))))
+            (cond ((assoc 'role delta)
+                   (insert "\n"))
+                  ((assoc 'content delta)
+                   (insert (cdr (assoc 'content delta))))))))))
+
+(defun insert-error-message (content)
+  "Insert error message to uguisu buffer."
+  (let ((json (json-read-from-string content)))
+    (insert (format "\n[Error] %s\n\n\n"
+                    (cdr (elt (cdr (assoc 'error json)) 0))))))
 
 (defun process-sentinel (process event)
   "Message process event."
