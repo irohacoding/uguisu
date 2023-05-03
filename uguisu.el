@@ -120,7 +120,7 @@
             (cond ((assoc 'role delta)
                    (insert "\n"))
                   ((assoc 'content delta)
-                   (insert (cdr (assoc 'content delta))))))))))
+                   (insert (cdr (assoc 'content delta)))))))))))
 
 (defun insert-error-message (content)
   "Insert error message to uguisu buffer."
