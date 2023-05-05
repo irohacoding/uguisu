@@ -25,13 +25,9 @@ ex. `M-x package-install` `RET` `json` `RET`
 
 ## Installation
 
-### Download
+1\. Download `uguisu.el` at GitHub
 
-Download `uguisu.el` at GitHub.
-
-### init.el
-
-Load uguisu.el, write code below to your init.el: ~/.emacs.d/init.el
+2\. Load uguisu.el, write code below to your init.el: ~/.emacs.d/init.el
 
 ```
 (require 'uguisu)
@@ -40,6 +36,8 @@ Load uguisu.el, write code below to your init.el: ~/.emacs.d/init.el
 ## Usage
 
 ### Launch
+
+Run command below, and then open *uguisu* buffer.
 
 `M-x uguisu`
 
@@ -51,4 +49,16 @@ Waiting for a while, you will receive a reply.
 
 ## Customization
 
-Nothing yet.
+### Change AI model
+
+`M-x customize-option` `RET` `uguisu-ai-model` `RET`
+
+Open customize buffer and click `Value Menu`.
+
+Select AI Model:
+
+0\. gpt-3.5-turbo
+
+1\. gpt-4
+
+After selected, click `Apply and Save`!
