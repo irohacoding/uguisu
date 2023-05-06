@@ -3,7 +3,7 @@
 ;; Copyright (C) 2023 IrohaCoding
 
 ;; Author: IrohaCoding <info@irohacoding.com>
-;; Version: 0.2.5
+;; Version: 0.2.6
 ;; Package-Requires: ((emacs "27.1"))
 ;; Homepage: https://github.com/irohacoding/uguisu
 
@@ -97,7 +97,7 @@
                              "curl" "https://api.openai.com/v1/chat/completions"
                              "-H" "Content-Type: application/json"
                              "-H" "Accept: text/event-stream"
-                             "-H" (format "Authorization: Bearer %s" openai-api-key)
+                             "-H" (format "Authorization: Bearer %s" (getenv "OPENAI_API_KEY"))
                              "-d" (json-encode `(("model" . ,uguisu-ai-model)
                                                  ("messages" . [(("role" . "user") ("content" . ,prompt))])
                                                  ("stream" . t))))))
