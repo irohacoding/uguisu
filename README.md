@@ -1,4 +1,5 @@
 # Uguisu
+
 A chat program with AI for GNU Emacs. houhokekyo!
 
 ## Prepare for use
@@ -7,9 +8,11 @@ A chat program with AI for GNU Emacs. houhokekyo!
 
 1\. Register [OpenAI](https://platform.openai.com/) and get the API key.
 
-2\. Set valiable: `openai-api-key` to your init.el or where Emacs can load.
+2\. Set environment valiable: `OPENAI_API_KEY` to your `~/.profile` or where Emacs can load.
 
-Be careful not to publish the api key!
+*Be careful not to publish the api key!*
+
+ex. `export OPENAI_API_KEY="your-openai-api-key"`
 
 ### curl command
 
