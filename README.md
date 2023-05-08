@@ -14,6 +14,8 @@ A chat program with AI for GNU Emacs. houhokekyo!
 
 ex. `export OPENAI_API_KEY="your-openai-api-key"`
 
+3\. Logout of your computer and log back in again.
+
 ### curl command
 
 If you don't install curl command, must install it before using this program.
@@ -30,7 +32,7 @@ ex. `M-x package-install` `RET` `json` `RET`
 
 1\. Download `uguisu.el` at GitHub
 
-2\. Load uguisu.el, write code below to your init.el: ~/.emacs.d/init.el
+2\. Load uguisu.el, write code below to your init.el: `~/.emacs.d/init.el`
 
 ```
 (require 'uguisu)
