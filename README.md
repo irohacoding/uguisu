@@ -8,13 +8,13 @@ A chat program with AI for GNU Emacs. houhokekyo!
 
 1\. Register [OpenAI](https://platform.openai.com/) and get the API key.
 
-2\. Set environment valiable: `OPENAI_API_KEY` to your `~/.profile` or where Emacs can load.
+2\. Set environment variable: `OPENAI_API_KEY` to your `~/.profile` or where Emacs can load.
 
-*Be careful not to publish the api key!*
+*Be careful not to publish the api key! and you may have to pay to use this API!*
 
 ex. `export OPENAI_API_KEY="your-openai-api-key"`
 
-3\. Logout of your computer and log back in again.
+3\. Log out of your computer and log back in again.
 
 ### curl command
 
@@ -42,13 +42,13 @@ ex. `M-x package-install` `RET` `json` `RET`
 
 ### Launch
 
-Run command below, and then open *uguisu* buffer.
+Run command below, and then open \*uguisu\* buffer.
 
 `M-x uguisu`
 
 ### Start chatting
 
-Write a message below Form Feed (^L) line.
+Write a message below Form Feed (^L) line and type `RET` twice.
 
 Waiting for a while, you will receive a reply.
 
@@ -62,8 +62,7 @@ Open customize buffer and click `Value Menu`.
 
 Select AI Model:
 
-0\. gpt-3.5-turbo
+0. gpt-3.5-turbo
+1. gpt-4
 
-1\. gpt-4
-
-After selected, click `Apply and Save`!
+After selected, click `Apply and Save`!!
