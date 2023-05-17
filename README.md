@@ -30,11 +30,14 @@ ex. `M-x package-install` `RET` `json` `RET`
 
 ## Installation
 
-1\. Download `uguisu.el` at GitHub
+1\. Download `uguisu.el` to your elisp directory: `~/.emacs.d/elisp/`
+
+*There is no problem with any name for the directory name "elisp"*
 
 2\. Load uguisu.el, write code below to your init.el: `~/.emacs.d/init.el`
 
 ```
+(add-to-list 'load-path "~/.emacs.d/elisp")
 (require 'uguisu)
 ```
 
