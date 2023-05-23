@@ -2,6 +2,8 @@
 
 A chat program with AI for GNU Emacs. houhokekyo!
 
+![uguisu.gif](uguisu.gif)
+
 ## Prepare for use
 
 ### OpenAI API key
